@@ -7,6 +7,8 @@ generic
 
 package arbre_bin is
 
+   not_exists: exception;
+
    type T_AB is private;
 
    -- nom : nom de la procédure
@@ -67,7 +69,7 @@ package arbre_bin is
    --  F_Param_n : Mode (In, In/Out, Out) Type; -- Rôle du paramètre
    -- pré-condition: Conditions sur les paramètres en entrée (in)
    -- post-condition: Conditions sur les paramètres en sortie (out)
-   function Rechercher_Noeud_Parent (Abr : T_AB; Donnee: in T_Element) return T_AB;
+   function Obtenir_Noeud_Parent (Abr : in T_AB; Noeud_Enfant: in T_AB) return T_AB;
 
    -- nom : nom de la procédure
    -- sémantique: Recherche dans l’AB Abr.
@@ -88,7 +90,7 @@ package arbre_bin is
    --  F_Param_n : Mode (In, In/Out, Out) Type; -- Rôle du paramètre
    -- pré-condition: Conditions sur les paramètres en entrée (in)
    -- post-condition: Conditions sur les paramètres en sortie (out)
-   procedure Modifier (Abr : in out T_AB ; src_donnee : out T_Element; tar_donnee : in T_Element);
+   procedure Modifier (Abr : in T_AB ; src_donnee : in T_Element; nouv_donnee : in T_Element);
 
    -- Supprimer la donnée dans l’AB Abr.
    -- nom : nom de la procédure
