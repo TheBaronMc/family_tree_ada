@@ -6,11 +6,11 @@ package body arbre_bin is
    -- Initialiser un AB Abr. L’AB est vide.
    procedure Initialiser(Abr: out T_AB) is
    begin
-      Abr := null;
+      Abr := new T_Noeud;
    end Initialiser;
 
    -- Est-ce qu’un AB Abr est vide ?
-   function Est_Vide (Abr : T_AB) return Boolean is
+   function Est_Vide (Abr : in T_AB) return Boolean is
    begin
       if Abr = null then
          return True;
@@ -37,41 +37,6 @@ package body arbre_bin is
       end if;
    end Taille;
 
-   --procedure Inserer_noeud (Abr : in out T_AB ; noeud : in T_AB) is
-   --begin
-   --   if Est_Vide(Abr => Abr) then
-   --      Abr := noeud;
-   --   elsif plus_grand_que(noeud.all.Donnee, Abr.all.Donnee) then
-   --      if Est_Vide(Abr => Abr.all.Sous_Arbre_Droit) then
-   --         Abr.all.Sous_Arbre_Droit := noeud;
-   --      else
-   --         Inserer_noeud (Abr => Abr.all.Sous_Arbre_Droit, noeud => noeud);
-   --      end if;
-   --   elsif plus_petit_que(noeud.all.Donnee, Abr.all.Donnee) then
-   --      if Est_Vide(Abr => Abr.all.Sous_Arbre_Gauche) then
-   --         Abr.all.Sous_Arbre_Gauche := noeud;
-   --      else
-   --         Inserer_noeud (Abr => Abr.all.Sous_Arbre_Gauche, noeud => noeud);
-   --      end if;
-   --   end if;
-   --end Inserer_noeud;
-
-
-   -- Insérer la donnée dans l’AB Abr.
-   --procedure Inserer (Abr : in out T_AB ; Donnee : in T_Element) is
-   --   noeud : T_AB := New T_Noeud;
-   --   trier : Boolean := False;
-   --begin
-   --   noeud.all.Donnee := Donnee;
-   --   noeud.all.Sous_Arbre_Gauche := null;
-   --   noeud.all.Sous_Arbre_Droit := null;
-   --
-   --   Inserer_noeud (Abr   => Abr,
-   --                  noeud => noeud);
-   --
-   --end Inserer;
-
-   -- Insérer la donnée dans l’AB Abr.
    procedure Inserer (Abr : in out T_AB ; Donnee : in T_Element) is
    begin
       Abr.all.Donnee := Donnee;
@@ -164,11 +129,6 @@ package body arbre_bin is
 
    end Obtenir_Noeud_Parent;
 
-   function Est_Present (Abr : T_AB; Donnee: in T_Element) return Boolean is
-   begin
-      return True;
-   end Est_Present;
-
    -- Modifier la donnée dans l’AB Abr.
    procedure Modifier (Abr : in T_AB ; src_donnee : in T_Element; nouv_donnee : in T_Element) is
       noeud : T_AB := new T_Noeud;
@@ -201,18 +161,29 @@ package body arbre_bin is
       noeud_enfant: T_AB := new T_Noeud;
       noeud_parent: T_AB := new T_Noeud;
    begin
-      -- obtenir le noeud parent du noeud contenant la donnee
+
+      -- obtenir le noeud contenant la donnee
       noeud_enfant := Rechercher (Abr    => Abr,
                                   Donnee => donnee);
-      noeud_parent := Obtenir_Noeud_Parent ( Abr          => Abr,
-                                             Noeud_Enfant => noeud_enfant);
-      -- mettre le pointeur à null
-      if noeud_parent.all.Sous_Arbre_Droit = noeud_enfant then
-         noeud_parent.all.Sous_Arbre_Droit := null;
-      else
-         noeud_parent.all.Sous_Arbre_Gauche := null;
+      if noeud_enfant = null then
+         raise not_exists;
       end if;
 
+      -- obtenir le noeud parent
+      noeud_parent := Obtenir_Noeud_Parent ( Abr          => Abr,
+                                             Noeud_Enfant => noeud_enfant);
+
+      -- Si le noeud contenant la donnee correspond à la racine
+      if noeud_parent = null then
+         Initialiser (Abr => Abr);
+      else
+         -- mettre le pointeur à null
+         if noeud_parent.all.Sous_Arbre_Droit = noeud_enfant then
+            noeud_parent.all.Sous_Arbre_Droit := null;
+         else
+            noeud_parent.all.Sous_Arbre_Gauche := null;
+         end if;
+      end if;
    end Supprimer;
 
    function obetenir_donnee_noeud(noeud: in T_AB) return T_Element is
@@ -236,13 +207,22 @@ package body arbre_bin is
       -- R0: Insérer à gauche ?
       -- R1: Comment R0 ?
       --    créé un noeud contenant les données (R2)
-      --    Abr.all.Sous_Arbre_Gauche := noeud;
+      --    if Est_Vide(Abr.all.Sous_Arbre_Gauche) then
+      --        Abr.all.Sous_Arbre_Gauche := noeud;
+      --    else
+      --        raise noeud_non_null;
+      --    end if;
       -- R2: Comment R2 ?
       --    noeud : T_AB := new T_Noeud;
       --    noeud.all.Donnee := Donnee;
 
       noeud.all.Donnee := Donnee;
-      Abr.all.Sous_Arbre_Gauche := noeud;
+      if Est_Vide(Abr => Abr.all.Sous_Arbre_Gauche) then
+         Abr.all.Sous_Arbre_Gauche := noeud;
+      else
+         raise noeud_non_null;
+      end if;
+
    end Inserer_a_gauche;
 
 
@@ -254,7 +234,11 @@ package body arbre_bin is
       -- Voir les raffinages pour "Inserer_a_gauche"
 
       noeud.all.Donnee := Donnee;
-      Abr.all.Sous_Arbre_Droit := noeud;
+      if Est_Vide(Abr => Abr.all.Sous_Arbre_Droit) then
+         Abr.all.Sous_Arbre_Droit := noeud;
+      else
+         raise noeud_non_null;
+      end if;
    end Inserer_a_droite;
 
 end arbre_bin;

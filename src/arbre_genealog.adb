@@ -3,12 +3,14 @@ with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
 package body Arbre_Genealog is
 
+   insertion_erreur : exception;
+
    function egale(A: T_Personne; B: T_Personne) return Boolean is
    begin
       return getId(personne => A) = getId(personne => B);
    end egale;
 
-   function creation_arbre(personne_racine : in out T_Personne) return T_AG is
+   function creation_arbre(personne : in out T_Personne) return T_AG is
       racine : T_AG;
    begin
       -- R0: Comment créer un arbre généalogique ?
@@ -48,6 +50,8 @@ package body Arbre_Genealog is
          Inserer_a_droite(Abr    => enfant,
                           Donnee => parent);
       end if;
+   exception
+         when noeud_non_null => raise insertion_erreur;
    end ajouter_parent;
 
    function obtenir_nombre_ancetre(noeud : in T_AG) return Integer is
@@ -57,6 +61,16 @@ package body Arbre_Genealog is
 
       return Taille(Abr => noeud);
    end obtenir_nombre_ancetre;
+
+   procedure supprimer_noeud(racine: in out T_AG; id: in Integer) is
+   begin
+
+      -- R0: Supprimer un noeud avec un identifiant donner
+      -- R1: Comment R0 ?
+      --     Crée un type personne avec l'id correspondant (R1.1)
+      --     Utiliser le sous-programme du module arbre_bin (R1.2)
+      null;
+   end supprimer_noeud;
 
 
 end Arbre_Genealog;

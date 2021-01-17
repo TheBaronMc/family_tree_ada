@@ -24,10 +24,10 @@ package Arbre_Genealog is
    -- nom : creation_arbre
    -- sémantique: créer un arbre avec pour origine la personne en paramètre
    -- paramètres:
-   --  personne_original : In personne; -- origine de l'abre
+   --  personne : In T_Personne; -- origine de l'abre
    -- pré-condition: le paramètre 'id' de la variable personne ne doit pas être null
    -- post-condition: L'abre est créé et un pointeur est renvoyé
-   function creation_arbre(personne_racine : in out T_Personne) return T_AG;
+   function creation_arbre(personne : in out T_Personne) return T_AG;
    
    -- nom : ajouter_parent
    -- sémantique: ajoute un parent à un noeud enfant donné
@@ -35,8 +35,8 @@ package Arbre_Genealog is
    --  enfant : In T_AB; -- enfant qui se vera un parent ajouter
    --  parent : In personne; -- parent qui sera ajouter à l'enfant
    -- post-condition: Le parent a été ajouté à l'enfant
+   -- execption: insertion_erreur -- le parent n'a pas pu être insérer
    procedure ajouter_parent(enfant : in out T_AG; parent: in T_Personne);
-   
    
    -- nom : nom de la procédure
    -- sémantique: décrire ce que réalise la procédure
@@ -77,7 +77,7 @@ package Arbre_Genealog is
    --  F_Param_n : Mode (In, In/Out, Out) Type; -- Rôle du paramètre
    -- pré-condition: Conditions sur les paramètres en entrée (in)
    -- post-condition: Conditions sur les paramètres en sortie (out)   
-   --procedure supprimer_noeud(racine: in out T_AG; id: in Integer);
+   procedure supprimer_noeud(racine: in out T_AG; id: in Integer);
    
    -- nom : nom de la procédure
    -- sémantique: décrire ce que réalise la procédure
