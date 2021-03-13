@@ -1,55 +1,38 @@
-with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
 package body P_Personne is
 
-   function equal(pers1: T_Personne; pers2: T_Personne) return Boolean is
+   function egale(pers1: T_Personne; pers2: T_Personne) return Boolean is
    begin
       -- R0: Savoir si les deux personnes sont les mêmes
       -- R1: Comment R0 ?
       --     pers1.id = pers2.id
 
       return pers1.id = pers2.id;
-   end equal;
+   end egale;
 
 
-   function getDate(jour: Integer; mois: Integer; annee: Integer) return T_Date is
-      date : T_Date;
-   begin
-      -- R0: Création d'une date
-      -- R1: Comment R0 ?
-      --     verification annee
-      --         attribution annee
-      --     verification mois
-      --         attribution mois
-      --     verification jour
-      --         attribution jour
-
-      -- verification annee
-      date.annee := annee;
-
-      -- verification mois
-      if (mois >= 1) and (mois <= 12) then
-         date.mois := mois;
-      else
-         raise error_date;
-      end if;
-
-      -- verification jour
-      if (jour >= 1) and (jour <= 31) then
-         date.jour := jour;
-      else
-         raise error_date;
-      end if;
-
-      return date;
-   end getDate;
-
-
-   function Creer_Personne(id: Integer; prenom: T_Chaine; nom: T_Chaine; sexe: Character) return T_Personne is
+   function Creer_Personne(id: Integer) return T_Personne is
       personne : T_Personne;
    begin
       personne.id := id;
+      personne.prenom := Ada.Strings.Unbounded.To_Unbounded_String("N/A");
+      personne.nom := Ada.Strings.Unbounded.To_Unbounded_String("N/A");
+      personne.sexe := 'N';
+      personne.pays_naissance := Ada.Strings.Unbounded.To_Unbounded_String("N/A");
+      personne.ville_naissance := Ada.Strings.Unbounded.To_Unbounded_String("N/A");
+      personne.date_naissance := Obtenir_date(jour => -1, mois => -1, annee => -1);
+      personne.pays_deces := Ada.Strings.Unbounded.To_Unbounded_String("N/A");
+      personne.ville_deces := Ada.Strings.Unbounded.To_Unbounded_String("N/A");
+      personne.date_deces := Obtenir_date(jour => -1, mois => -1, annee => -1);
+
+      return personne;
+   end Creer_Personne;
+
+   function Creer_Personne(id: Integer; prenom: Unbounded_String; nom: Unbounded_String; sexe: Character) return T_Personne is
+      personne : T_Personne;
+   begin
+      personne := Creer_Personne (id => id);
       personne.prenom := prenom;
       personne.nom := nom;
       personne.sexe := sexe;
@@ -58,7 +41,7 @@ package body P_Personne is
    end Creer_Personne;
 
 
-   function Creer_Personne(id: Integer; prenom: T_Chaine; nom: T_Chaine; sexe: Character; pays_naissance: T_Chaine; ville_naissance: T_Chaine; date_naissance: T_Date) return T_Personne is
+   function Creer_Personne(id: Integer; prenom: Unbounded_String; nom: Unbounded_String; sexe: Character; pays_naissance: Unbounded_String; ville_naissance: Unbounded_String; date_naissance: T_Date) return T_Personne is
       personne : T_Personne;
    begin
       personne := Creer_Personne (id             => id,
@@ -73,7 +56,7 @@ package body P_Personne is
    end Creer_Personne;
 
 
-   function Creer_Personne(id: Integer; prenom: T_Chaine; nom: T_Chaine; sexe: Character; pays_naissance: T_Chaine; ville_naissance: T_Chaine; date_naissance: T_Date; pays_deces: T_Chaine; ville_deces: T_Chaine; date_deces: T_Date) return T_Personne is
+   function Creer_Personne(id: Integer; prenom: Unbounded_String; nom: Unbounded_String; sexe: Character; pays_naissance: Unbounded_String; ville_naissance: Unbounded_String; date_naissance: T_Date; pays_deces: Unbounded_String; ville_deces: Unbounded_String; date_deces: T_Date) return T_Personne is
       personne: T_Personne;
    begin
       personne := Creer_Personne (id              => id,
@@ -96,15 +79,16 @@ package body P_Personne is
       return personne.id;
    end getId;
 
+   function getFirstname(personne: T_Personne) return Unbounded_String is
+   begin
+      return personne.prenom;
+   end getFirstname;
 
-   -- nom : nom de la procédure
-   -- sémantique: décrire ce que réalise la procédure
-   -- paramètres:
-   --  F_Param_1 : Mode (In, In/Out, Out) Type; -- Rôle du paramètre
-   --  ...
-   --  F_Param_n : Mode (In, In/Out, Out) Type; -- Rôle du paramètre
-   -- pré-condition: Conditions sur les paramètres en entrée (in)
-   -- post-condition: Conditions sur les paramètres en sortie (out)
+   function getName(personne: T_Personne) return Unbounded_String is
+   begin
+      return personne.nom;
+   end getName;
+
    function getSexe(personne: T_Personne) return Character is
    begin
       return personne.sexe;
@@ -113,14 +97,16 @@ package body P_Personne is
 
    procedure affichePersonne(personne: T_Personne) is
    begin
-      Put("ID : "&Integer'Image(personne.id));
-      New_Line;
-      Put("PRENOM : ");
-      Put_Line(personne.prenom.chaine);
-      Put("NOM : ");
-      Put_Line(personne.nom.chaine);
-      Put("SEXE : "&Character'Image(personne.sexe));
-      New_Line;
+      Put_Line("ID              : "&Integer'Image(personne.id));
+      Put_Line("PRENOM          : "&To_String(personne.prenom));
+      Put_Line("NOM             : "&To_String(personne.nom));
+      Put_Line("SEXE            : "&Character'Image(personne.sexe));
+      Put_Line("PAYS NAISSANCE  : "&To_String( personne.pays_naissance ));
+      Put_Line("VILLE NAISSANCE : "&To_String( personne.ville_naissance ));
+      Put_Line("DATE NAISSANCE  : "&Obtenir_chaine_date(date => personne.date_naissance));
+      Put_Line("PAYS DECES      : "&To_String( personne.pays_deces ));
+      Put_Line("VILLE DECES     : "&To_String( personne.ville_deces ));
+      Put_Line("DATE DECES      : "&Obtenir_chaine_date(date => personne.date_deces));
    end affichePersonne;
 
 end P_Personne;

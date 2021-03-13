@@ -3,10 +3,12 @@ generic
    with function egale(A: T_Element; B: T_Element) return Boolean;
    with procedure afficher_element(element : in T_Element);
 
-package arbre_bin is
+package P_Arbre_Bin is
 
    not_exists: exception;
    noeud_non_null: exception;
+   rechercher_erreur: exception;
+   arbre_vide: exception;
 
    type T_AB is private;
 
@@ -38,7 +40,7 @@ package arbre_bin is
    --  Donnee : In T_Element; -- Donnee qui sera inséré dans l'abre
    -- pré-condition: L'arbre doit avoir été initialisé.
    -- post-condition: La donnée a été ajouter à l'arbre sur le noeud courant.
-   procedure Inserer (Abr : in out T_AB ; Donnee : in T_Element);
+   procedure Inserer_donnee (Abr : in out T_AB ; Donnee : in T_Element);
 
    -- nom : Rechercher
    -- sémantique: Recherche dans l’AB Abr.
@@ -101,7 +103,41 @@ package arbre_bin is
    -- paramètres:
    --  noeud : In T_AB; -- Noeud pour lequel on veut la donnée
    -- pré-condition: Le noeud doit être initialisé
-   function obetenir_donnee_noeud(noeud: in T_AB) return T_Element;
+   function obtenir_donnee_noeud(noeud: in T_AB) return T_Element;
+
+   -- nom : Afficher_Arbre_Bin
+   -- sémantique: Affiche l'arbre
+   -- paramètres:
+   --  Abr : In T_AB; -- l'arbre qui va être affiché
+   procedure Afficher_Arbre_Bin (Abr : in T_AB);
+
+   -- nom : arbre_bin_egale
+   -- sémantique: Vérifier si nos pointeurs pointent bien sur le même arbre
+   -- paramètres:
+   --  A : In T_AB;
+   --  B : In T_AB;
+   function arbre_bin_egale (A: in T_AB; B: in T_AB) return Boolean;
+
+   -- nom : Obtenir_sous_arbre_gauche
+   -- sémantique: Renvoie le sous arbre gauche
+   -- paramètres:
+   --  noeud : In T_AB; -- Noeud du quel on veut le sous arbre gauche
+   -- pré-condition: Le noeud doit au moins être initialisé
+   function Obtenir_sous_arbre_gauche (noeud: in T_AB) return T_AB;
+
+   -- nom : Obtenir_sous_arbre_droit
+   -- sémantique: Renvoie le sous arbre droit
+   -- paramètres:
+   --  noeud : In T_AB; -- Noeud du quel on veut le sous arbre droit
+   -- pré-condition: Le noeud doit au moins être initialisé
+   function Obtenir_sous_arbre_droit (noeud: in T_AB) return T_AB;
+
+   -- nom : Obtenir_longueur
+   -- sémantique: Renvoie la longueur maximale de l'arbre.
+   -- paramètres:
+   --  racine : In T_AB;
+   -- pré-condition: La racine doit être initialisé
+   function Obtenir_longueur (racine: in T_AB) return Integer;
 
 private
 
@@ -114,4 +150,4 @@ private
          Sous_Arbre_Droit : T_AB;
       end record;
 
-end arbre_bin;
+end P_Arbre_Bin;

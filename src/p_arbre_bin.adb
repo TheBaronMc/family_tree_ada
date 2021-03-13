@@ -1,12 +1,12 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 
-package body arbre_bin is
+package body P_Arbre_Bin is
 
    -- Initialiser un AB Abr. L’AB est vide.
    procedure Initialiser(Abr: out T_AB) is
    begin
-      Abr := new T_Noeud;
+      Abr := null;
    end Initialiser;
 
    -- Est-ce qu’un AB Abr est vide ?
@@ -37,49 +37,38 @@ package body arbre_bin is
       end if;
    end Taille;
 
-   procedure Inserer (Abr : in out T_AB ; Donnee : in T_Element) is
+   procedure Inserer_donnee (Abr : in out T_AB ; Donnee : in T_Element) is
+      noeud : T_AB := new T_Noeud;
    begin
-      Abr.all.Donnee := Donnee;
-      Abr.all.Sous_Arbre_Gauche := null;
-      Abr.all.Sous_Arbre_Droit := null;
-   end Inserer;
+      noeud.all.Donnee := Donnee;
+      noeud.all.Sous_Arbre_Gauche := null;
+      noeud.all.Sous_Arbre_Droit := null;
+
+      if Est_Vide (Abr => Abr) then
+         Abr := noeud;
+      else
+         Abr.all.Donnee := noeud.all.Donnee;
+      end if;
+   end Inserer_donnee;
 
    -- Recherche dans l’AB Abr.
    function Rechercher (Abr : in T_AB; Donnee: in T_Element) return T_AB is
       pointeur : T_AB := null;
    begin
-      -- R0: Trouver un noeud pointant sur l'élément de l'arbre ?
-      -- R1: Comment R0 ?
-      --     Si le noeud courant pointe sur les mêmes données
-      --        renvoyer le noeud courant
-      --     Sinon si non Est_Vide(Arb.sous_arbre_droit) ou non Est_Vide(Arb.sous_arbre_gauche)
-      --        pointeur : T_AB
-      --        si non Est_Vide(Arb.sous_arbre_droit)
-      --            pointeur := rechercher(Abr : T_AB; Donnee: in T_Element)
-      --            si not (pointeur = null) alors
-      --                return pointeur;
-      --            fin si
-      --        fin si
-      --        si non Est_Vide(Arb.sous_arbre_gauche)
-      --            pointeur := rechercher(Abr : T_AB; Donnee: in T_Element)
-      --            si not (pointeur = null) alors
-      --                return pointeur;
-      --            fin si
-      --        fin si
-      --        renvoie null;
-      --     Sinon
-      --        renvoyer null
-      --     Fin Si
-
-      if egale (A => Abr.all.Donnee, B => Donnee) then
+      -- Si la donnée se trouve dans le noeud actuel
+      if egale(Abr.all.Donnee, Donnee) then
          return Abr;
+
+      -- Si l'un des deux sous-arbres n'est pas vide
       elsif (not Est_Vide( Abr => Abr.all.Sous_Arbre_Gauche)) or (not Est_Vide( Abr => Abr.all.Sous_Arbre_Droit)) then
+         -- Si le sous-arbre gauche n'est pas vide
          if not Est_Vide( Abr => Abr.all.Sous_Arbre_Gauche) then
             pointeur := Rechercher(Abr    => Abr.all.Sous_Arbre_Gauche, Donnee => Donnee);
             if not Est_Vide(Abr => pointeur) then
                return pointeur;
             end if;
          end if;
+          -- Si le sous-arbre droit n'est pas vide
          if not Est_Vide( Abr => Abr.all.Sous_Arbre_Droit) then
             pointeur := Rechercher(Abr    => Abr.all.Sous_Arbre_Droit, Donnee => Donnee);
             if not Est_Vide(Abr => pointeur) then
@@ -150,7 +139,7 @@ package body arbre_bin is
 
       noeud := Rechercher (Abr    => Abr,
                            Donnee => src_donnee);
-      if Est_Vide(noeud) then
+      if not Est_Vide(noeud) then
          noeud.all.Donnee := nouv_donnee;
       else
          raise not_exists;
@@ -163,18 +152,16 @@ package body arbre_bin is
    begin
 
       -- obtenir le noeud contenant la donnee
-      noeud_enfant := Rechercher (Abr    => Abr,
-                                  Donnee => donnee);
-      if noeud_enfant = null then
+      noeud_enfant := Rechercher (Abr => Abr, Donnee => donnee);
+      if Est_Vide (Abr => noeud_enfant) then
          raise not_exists;
       end if;
 
       -- obtenir le noeud parent
-      noeud_parent := Obtenir_Noeud_Parent ( Abr          => Abr,
-                                             Noeud_Enfant => noeud_enfant);
+      noeud_parent := Obtenir_Noeud_Parent (Abr => Abr, Noeud_Enfant => noeud_enfant);
 
       -- Si le noeud contenant la donnee correspond à la racine
-      if noeud_parent = null then
+      if Est_Vide (Abr => noeud_parent) then
          Initialiser (Abr => Abr);
       else
          -- mettre le pointeur à null
@@ -186,14 +173,14 @@ package body arbre_bin is
       end if;
    end Supprimer;
 
-   function obetenir_donnee_noeud(noeud: in T_AB) return T_Element is
+   function obtenir_donnee_noeud(noeud: in T_AB) return T_Element is
    begin
       return noeud.all.Donnee;
-   end obetenir_donnee_noeud;
+   end obtenir_donnee_noeud;
 
    procedure Afficher_Arbre_Bin (Abr : in T_AB) is
    begin
-      if(Abr /= null) then
+      if not Est_Vide(Abr => Abr) then
          afficher_element(Abr.all.donnee);
          Afficher_Arbre_Bin(Abr.all.Sous_Arbre_Gauche);
          Afficher_Arbre_Bin(Abr.all.Sous_Arbre_Droit);
@@ -241,4 +228,44 @@ package body arbre_bin is
       end if;
    end Inserer_a_droite;
 
-end arbre_bin;
+   function arbre_bin_egale (A: in T_AB; B: in T_AB) return Boolean is
+   begin
+      return A = B;
+   end arbre_bin_egale;
+
+   function Obtenir_sous_arbre_gauche (noeud: in T_AB) return T_AB is
+   begin
+      return noeud.all.Sous_Arbre_Gauche;
+   end Obtenir_sous_arbre_gauche;
+
+   function Obtenir_sous_arbre_droit (noeud: in T_AB) return T_AB is
+   begin
+      return noeud.all.Sous_Arbre_Droit;
+   end Obtenir_sous_arbre_droit;
+
+
+   function Obtenir_longueur (racine: in T_AB) return Integer is
+      longueur: Integer;
+      longueurSAG: Integer;
+      longueurSAD: Integer;
+   begin
+      if Est_Vide (Abr => racine) then
+         return 0;
+      else
+         longueur := 1;
+         longueurSAD := Obtenir_longueur(racine => racine.all.Sous_Arbre_Droit);
+         longueurSAG := Obtenir_longueur(racine => racine.all.Sous_Arbre_Gauche);
+         if longueurSAD > longueurSAG then
+            longueur := longueurSAD + longueur;
+         elsif longueurSAG > longueurSAD then
+            longueur := longueurSAG + longueur;
+         else -- les deux longueur sont égales
+            longueur := longueurSAD + longueur;
+         end if;
+
+         return longueur;
+      end if;
+   end Obtenir_longueur;
+
+
+end P_Arbre_Bin;
